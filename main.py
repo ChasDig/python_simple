@@ -64,25 +64,57 @@
 #     item = next(res)
 #     print(item, type(item), sep=" ")
 
-import multiprocessing
-import os
-import time
+# import multiprocessing
+# import os
+# import time
+#
+#
+# def do_this(say: str):
+#     print("Процесс №{} сказал {}".format(os.getpid(), say))
+#
+#
+# if __name__ == "__main__":
+#     for item in range(5):
+#         process = multiprocessing.Process(
+#             target=do_this,
+#             args=(item,),
+#         )
+#         process.start()
+#         print(f"Процесс {item} запущен")
+#         if item == 3:
+#             print(f"Процесс {item} был убит и не будет ожидать 5 секунд, т.к. он был равен 3.")
+#             process.terminate()
+#         else:
+#             time.sleep(5)
+#
+# some_list = [1, 2, 3, 4, 5]
+#
+#
+# def added_element_in_list(user_list: list, user_range: int, user_value: int):
+#     if user_range >= len(user_list):
+#         print("Out or range!")
+#         buffer = user_range + 1 - len(user_list)
+#         user_list.extend([None] * buffer)
+#     user_list[user_range] = user_value
+#
+#
+# added_element_in_list(some_list, 7, 99)
+# print(some_list)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
-def do_this(say: str):
-    print("Процесс №{} сказал {}".format(os.getpid(), say))
+dial_codes = [
+    (880, 'Bangladesh'),
+    (55, 'Brazil'),
+    (86, 'China'),
+    (91, 'India'),
+    (62, 'Indonesia'),
+    (81, 'Japan'),
+    (234, 'Nigeria'),
+    (92, 'Pakistan'),
+    (7, 'Russia'),
+    (1, 'United States'),
+]
 
-
-if __name__ == "__main__":
-    for item in range(5):
-        process = multiprocessing.Process(
-            target=do_this,
-            args=(item,),
-        )
-        process.start()
-        print(f"Процесс {item} запущен")
-        if item == 3:
-            print(f"Процесс {item} был убит и не будет ожидать 5 секунд, т.к. он был равен 3.")
-            process.terminate()
-        else:
-            time.sleep(5)
+simple_dict = {country: code for code, country in dial_codes}
+print(simple_dict)
