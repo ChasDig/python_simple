@@ -1,13 +1,26 @@
+import operator
+import functools
+import reprlib
 from array import array
 import math
 
 
 class Vector2D:
     typecode = 'b'
+    # Для работы с позиционными образцами:
+    __match_args__ = ('x', 'y')
 
     def __init__(self, x, y):
-        self.x = float(x)
-        self.y = float(y)
+        self.__x = float(x)
+        self.__y = float(y)
+
+    @property
+    def x(self):
+        return self.__x
+
+    @property
+    def y(self):
+        return self.__y
 
     def __iter__(self):
         #  Итерация. Благодаря этому методу реализуется распаковка. В данном случае реализуется генераторным выражением:
@@ -56,6 +69,10 @@ class Vector2D:
         components = (format(c, format_spec) for c in coord)
         return outer_tmp.format(*components)
 
+    def __hash__(self):
+        #  Вычисляем хэш кортежа:
+        return hash((self.x, self.y))
+
     def angel(self):
         #  Возвращаем угол полярных координат:
         return math.atan2(self.x, self.y)
@@ -71,4 +88,77 @@ class Vector2D:
         return cls(*memv)
 
 
-print(format(Vector2D(1, 1), 'p'))
+# print(format(Vector2D(1, 1), 'p'))
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+# Специальные методы для последовательностей:
+class Vector:
+    __match_args__ = ("x", "y", "z", "t")
+    typecode = 'd'
+
+    def __init__(self, components):
+        self._components = array(self.typecode, components)
+
+    def __iter__(self):
+        return iter(self._components)
+
+    def __len__(self):
+        return len(self._components)
+
+    def __getitem__(self, item):
+        #  Если экземпляр класса является последовательностью...
+        if isinstance(item, slice):
+            # ...то получаем класс экземпляра...
+            cls = type(self)
+            # ... вызываем класс для построения нового экземпляра по срезу массива _components:
+            return cls(self._components[item])
+        #  Функция operator.index вызываем специальный метод __index__. Специальная функция для получения индекса
+        #  (проверка на возможность применения объекта в качестве индекса):
+        index = operator.index(item)
+        return self._components[index]
+
+    def __getattr__(self, item):
+        # Стр. 392:
+        cls = type(self)
+        try:
+            pos = cls.__match_args__.index(item)
+        except ValueError:
+            pos = -1
+        if 0 <= pos < len(self._components):
+            return self._components[pos]
+        msg = f"{cls.__name__!r} object has no attribute {item!r}"
+        raise AttributeError(msg)
+
+    def __setattr__(self, key, value):
+        cls = type(self)
+        if len(key) == 1:
+            if key in cls.__match_args__:
+                error = "readonly attribute {attr_name!r}"
+            elif key.islower():
+                error = "can't set attributes 'z' to 'z' in {cls_name!r}"
+            else:
+                error = ""
+            if error:
+                msg = error.format(cls_name=cls.__name__, attr_name=key)
+                raise AttributeError(msg)
+        super().__setattr__(key, value)
+
+    def __eq__(self, other):
+        # Т.к. в отличие от класса Vector2D, в данной реализации количество элементов при инициализации не фиксированно,
+        # то переопределяем метод:
+        return len(self) == len(other) and all(a == b for a, b in zip(self, other))
+
+    def __hash__(self):
+        hashes = map(hash, self._components)
+        return functools.reduce(operator.xor, hashes, 0)
+
+    def __repr__(self):
+        components = reprlib.repr(self._components)
+        components = components[components.find('['):-1]
+        return f"Vector({components})"
+
+
+vector_1 = Vector(range(7))
+print(vector_1)
+print(vector_1.x)
